@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
 
-const supabaseUrl = 'https://aimistcqlndneimalstl.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbWlzdGNxbG5kbmVpbWFsc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTAyMDA1NjIsImV4cCI6MjAwNTc3NjU2Mn0.qHDDDVAtqG37P0nS9dqzvX6VWSMX00KsV877YXgdf38';
+// Supabase Client Setup
+const supabaseUrl = 'https://fuhqxfbyvrklxggecynt.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1aHF4ZmJ5dnJrbHhnZ2VjeW50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4ODk0MzcsImV4cCI6MjA1MzQ2NTQzN30.0r2cHr8g6nNwjaVaVGuXjo9MXNFu9_rx40j5Bb3Ib2Q'; // Replace this with your actual key securely
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const FullScreenImage = () => {
@@ -11,31 +12,34 @@ const FullScreenImage = () => {
   useEffect(() => {
     fetchLatestImage();
 
+    // Set up real-time subscription
     const channel = supabase
-      .channel('gurgaon')
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'images' },
-        payload => {
-          setImageUrl(payload.new.url);
+      .channel('realtime-images')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'lollapolozza' },
+        (payload) => {
+          console.log('New image detected:', payload);
+          setImageUrl(payload.new?.publicURL); // Ensure the correct field
         }
       )
       .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, []);
 
   const fetchLatestImage = async () => {
     try {
       const { data, error } = await supabase
-        .from('images')
-        .select('url')
+        .from('lollapolozza')
+        .select('publicURL')
         .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
       if (error) throw error;
-      if (data) setImageUrl(data.url);
+      if (data && data.length > 0) setImageUrl(data[0]?.publicURL);
     } catch (error) {
       console.error('Error fetching image:', error);
     }
@@ -78,6 +82,7 @@ const FullScreenImage = () => {
 };
 
 export default FullScreenImage;
+
 
 
 // // import { useState, useEffect } from 'react';
