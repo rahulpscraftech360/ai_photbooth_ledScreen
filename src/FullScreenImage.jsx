@@ -62,8 +62,7 @@ const FullScreenImage = () => {
   const imageStyle = {
     width: '100%',
     height: '100%',
-    objectFit: 'fill',
-    objectPosition: 'center',
+    objectFit: 'cover',
   };
 
   return (
